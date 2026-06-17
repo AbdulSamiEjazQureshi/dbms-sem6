@@ -1,14 +1,10 @@
-import mongoose, { Schema, type Document, type Model } from 'mongoose';
-
-
+import mongoose, { Schema, type Document, type Model, Types } from 'mongoose';
 
 export interface IPageDesign extends Document {
 	name: string;
 	page_title: string;
 	heading: string;
 	content: string;
-
-	
 	font_family: string;
 	heading_font: string;
 	font_size: number;
@@ -19,8 +15,6 @@ export interface IPageDesign extends Document {
 	heading_color: string;
 	line_height: number;
 	letter_spacing: number;
-
-	
 	background_color: string;
 	accent_color: string;
 	link_color: string;
@@ -28,8 +22,6 @@ export interface IPageDesign extends Document {
 	text_align: string;
 	border_radius: number;
 	max_width: number;
-
-	
 	button_text: string;
 	button_bg: string;
 	button_text_color: string;
@@ -38,11 +30,8 @@ export interface IPageDesign extends Document {
 	button_padding_h: number;
 	button_full_width: boolean;
 	show_button: boolean;
-
-	
+	user_id: Types.ObjectId | string | null;
 	schema_version: number;
-
-	
 	created_at: string;
 	updated_at: string;
 }
@@ -53,8 +42,6 @@ const pageSchema = new Schema<IPageDesign>(
 		page_title: { type: String, default: 'My Page - Webuilder', trim: true, maxlength: 300 },
 		heading: { type: String, default: 'Hello, World!', trim: true, maxlength: 500 },
 		content: { type: String, default: 'This is a sample page created with the Web Builder. Customize fonts, colors, layout, and even add buttons — all changes update in real-time.', maxlength: 10000 },
-
-		
 		font_family: { type: String, default: 'Inter, sans-serif', trim: true, maxlength: 200 },
 		heading_font: { type: String, default: 'DM Serif Display, Georgia, serif', trim: true, maxlength: 200 },
 		font_size: { type: Number, default: 20, min: 1, max: 200 },
@@ -65,8 +52,6 @@ const pageSchema = new Schema<IPageDesign>(
 		heading_color: { type: String, default: '#2d5a3d', trim: true, match: /^#[0-9a-fA-F]{6}$/ },
 		line_height: { type: Number, default: 1.7, min: 0.5, max: 5 },
 		letter_spacing: { type: Number, default: 0, min: -10, max: 50 },
-
-		
 		background_color: { type: String, default: '#f7f3ee', trim: true, match: /^#[0-9a-fA-F]{6}$/ },
 		accent_color: { type: String, default: '#7dab7d', trim: true, match: /^#[0-9a-fA-F]{6}$/ },
 		link_color: { type: String, default: '#4a7c59', trim: true, match: /^#[0-9a-fA-F]{6}$/ },
@@ -74,8 +59,6 @@ const pageSchema = new Schema<IPageDesign>(
 		text_align: { type: String, default: 'center', enum: ['left', 'center', 'right', 'justify'] },
 		border_radius: { type: Number, default: 0, min: 0, max: 200 },
 		max_width: { type: Number, default: 800, min: 200, max: 3000 },
-
-		
 		button_text: { type: String, default: 'Get Started', trim: true, maxlength: 200 },
 		button_bg: { type: String, default: '#4a7c59', trim: true, match: /^#[0-9a-fA-F]{6}$/ },
 		button_text_color: { type: String, default: '#ffffff', trim: true, match: /^#[0-9a-fA-F]{6}$/ },
@@ -84,11 +67,8 @@ const pageSchema = new Schema<IPageDesign>(
 		button_padding_h: { type: Number, default: 32, min: 0, max: 200 },
 		button_full_width: { type: Boolean, default: false },
 		show_button: { type: Boolean, default: true },
-
-		
-		schema_version: { type: Number, default: 1, min: 1 },
-
-		
+		user_id: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+		schema_version: { type: Number, default: 2, min: 1 },
 		created_at: { type: String, default: '' },
 		updated_at: { type: String, default: '' },
 	},
@@ -103,7 +83,7 @@ const pageSchema = new Schema<IPageDesign>(
 	}
 );
 
-
 pageSchema.index({ updated_at: -1 });
+pageSchema.index({ user_id: 1, updated_at: -1 });
 
 export const Page: Model<IPageDesign> = mongoose.models.Page || mongoose.model<IPageDesign>('Page', pageSchema);

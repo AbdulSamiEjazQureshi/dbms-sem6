@@ -1,7 +1,8 @@
 import { json } from '@sveltejs/kit';
 import { getPage, updatePage, deletePage } from '$lib/server/db';
+import type { RequestHandler } from './$types';
 
-export async function GET({ params }) {
+export const GET: RequestHandler = async ({ params }) => {
 	try {
 		const { id } = params;
 		const page = await getPage(id);
@@ -12,9 +13,9 @@ export async function GET({ params }) {
 	} catch (e) {
 		return json({ error: e instanceof Error ? e.message : 'Failed to load page' }, { status: 500 });
 	}
-}
+};
 
-export async function PUT({ params, request }) {
+export const PUT: RequestHandler = async ({ params, request }) => {
 	try {
 		const { id } = params;
 		const data = await request.json();
@@ -26,9 +27,9 @@ export async function PUT({ params, request }) {
 	} catch (e) {
 		return json({ error: e instanceof Error ? e.message : 'Failed to update page' }, { status: 500 });
 	}
-}
+};
 
-export async function DELETE({ params }) {
+export const DELETE: RequestHandler = async ({ params }) => {
 	try {
 		const { id } = params;
 		const deleted = await deletePage(id);
@@ -39,4 +40,4 @@ export async function DELETE({ params }) {
 	} catch (e) {
 		return json({ error: e instanceof Error ? e.message : 'Failed to delete page' }, { status: 500 });
 	}
-}
+};

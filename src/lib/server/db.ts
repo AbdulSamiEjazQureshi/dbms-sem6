@@ -8,16 +8,12 @@ export async function getClient(): Promise<typeof mongoose> {
 		try {
 			await mongoose.connect(MONGODB_URI);
 		} catch (e) {
-			throw new Error(
-				`Failed to connect to MongoDB at ${MONGODB_URI}. Make sure MongoDB is running.`
-			);
+			throw new Error(`Failed to connect to MongoDB at ${MONGODB_URI}. Make sure MongoDB is running.`);
 		}
 		try {
 			await runMigrations();
 		} catch (e) {
-			throw new Error(
-				`Connected to MongoDB but migration failed: ${e instanceof Error ? e.message : e}`
-			);
+			throw new Error(`Connected to MongoDB but migration failed: ${e instanceof Error ? e.message : e}`);
 		}
 	}
 	return mongoose;
@@ -33,10 +29,17 @@ export async function initDatabase(): Promise<void> {
 	await getClient();
 }
 
+// ---- User-scoped CRUD ----
 
-export async function listPages(): Promise<IPageDesign[]> {
+export async function listPages(userId?: string | null): Promise<IPageDesign[]> {
 	await getClient();
-	const docs = await Page.find().sort({ updated_at: -1 }).lean({ virtuals: true });
+	const filter: Record<string, unknown> = {};
+	if (userId) {
+		filter.user_id = new mongoose.Types.ObjectId(userId);
+	} else {
+		filter.user_id = null;
+	}
+	const docs = await Page.find(filter).sort({ updated_at: -1 }).lean({ virtuals: true });
 	return docs.map((d) => ({
 		...d,
 		_id: String(d._id),
@@ -50,10 +53,13 @@ export async function getPage(id: string): Promise<IPageDesign | null> {
 	return { ...doc, _id: String(doc._id) } as unknown as IPageDesign;
 }
 
-export async function createPage(data: Partial<IPageDesign>): Promise<IPageDesign> {
+export async function createPage(data: Partial<IPageDesign>, userId?: string | null): Promise<IPageDesign> {
 	await getClient();
 	const { _id, ...cleanData } = data;
-	const doc = await Page.create(cleanData);
+	const doc = await Page.create({
+		...cleanData,
+		user_id: userId ? new mongoose.Types.ObjectId(userId) : null,
+	});
 	return JSON.parse(JSON.stringify(doc.toJSON()));
 }
 
